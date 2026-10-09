@@ -82,4 +82,4 @@ MIT. Libre d'usage, y compris commercial.
 
 ---
 
-Fait par un consultant SEO & GEO.
+Fait par [Youssef Jlidi](https://youssef-jlidi.com), consultant et formateur SEO & GEO.

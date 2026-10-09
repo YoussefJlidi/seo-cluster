@@ -90,3 +90,7 @@ Columns are detected automatically (Semrush and Ahrefs exports, in French or Eng
 ## License
 
 MIT. Free to use, including commercially.
+
+---
+
+Made by [Youssef Jlidi](https://youssef-jlidi.com), SEO & GEO consultant and trainer.
