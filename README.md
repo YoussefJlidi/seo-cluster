@@ -1,37 +1,41 @@
 # SEO Cluster
 
-**D'un export Semrush ou Ahrefs à une architecture de pages, en une commande.**
+🇬🇧 English · 🇫🇷 [Version française](README.fr.md)
 
-Tu donnes un CSV de mots-clés. Tu récupères un Excel qui dit quelles pages créer, quels mots-clés vont sur chaque page, quelle URL leur donner et par quoi commencer.
+**From a Semrush or Ahrefs keyword export to a page architecture, in one command.**
 
-Pensé pour les consultants SEO qui font encore ce travail à la main dans un tableur.
+You give it a keyword CSV. You get back an Excel file that tells you which pages to create, which keywords go on each page, what URL to give them, and where to start.
 
-> 🇬🇧 *Turns a Semrush/Ahrefs keyword export into a page plan (clusters, pages, URLs, priorities) as an Excel file. French-first, works with any language using Latin script.*
+Built for SEO consultants who still do this by hand in a spreadsheet. French-first, works with any language written in Latin script.
 
 ---
 
-## Ce que tu obtiens
+## What you get
 
-Un fichier Excel en 3 onglets :
+An Excel file with 3 sheets:
 
-| Onglet | Une ligne par… | Contenu |
+| Sheet | One row per… | Content |
 |---|---|---|
-| **Pages** | page à créer | cluster, priorité, URL proposée, titre, mot-clé principal, volume total de la page |
-| **Mots-cles** | mot-clé | le cluster et la page auxquels il est rattaché, son rang dans la page, son niveau de concurrence |
-| **Clusters** | cluster | volume total, nombre de pages, mot-clé pilier et URL pilier |
+| **Pages** | page to create | cluster, priority, proposed URL, title, main keyword, total page volume |
+| **Mots-cles** | keyword | the cluster and page it is assigned to, its rank within the page, its competition level |
+| **Clusters** | cluster | total volume, number of pages, pillar keyword and pillar URL |
 
-Exemple sur le fichier fourni (`sample_data.csv`, 141 mots-clés autour du canapé) : **14 clusters et 30 pages**.
+Sheet names and column headers in the output are in French.
+
+On the bundled file (`sample_data.csv`, 141 sofa-related keywords): **14 clusters and 30 pages**.
 
 ```
-Cluster               Priorité   Vol. total  Pages  KW pilier             URL pilier
-Canape Convertible    ★★★ Haute     319 670      8  canapé convertible    /canapes/canape-convertible/
-Canape Lit            ★★★ Haute      77 670      2  canapé lit            /canapes/canape-lit/
-Canape Velours Cotele ★★★ Haute      47 510      5  canapé velours cotelé /canapes/canape-velours-cotele/
+Cluster               Priority   Total vol.  Pages  Pillar keyword         Pillar URL
+Canape Convertible    ★★★ High      319,670      8  canapé convertible    /canapes/canape-convertible/
+Canape Lit            ★★★ High       77,670      2  canapé lit            /canapes/canape-lit/
+Canape Velours Cotele ★★★ High       47,510      5  canapé velours cotelé /canapes/canape-velours-cotele/
 ```
+
+(Illustrative: in the actual file, priority labels and headers are in French.)
 
 ## Installation
 
-Python 3 récent (testé avec Python 3.14).
+Recent Python 3 (tested with Python 3.14).
 
 ```bash
 git clone https://github.com/YoussefJlidi/seo-cluster.git
@@ -40,46 +44,49 @@ python3 -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-## Utilisation
+## Usage
 
 ```bash
-python seo_cluster.py mon_export.csv --base-url /canapes/
+python seo_cluster.py my_export.csv --base-url /sofas/
 ```
 
-L'Excel est écrit à côté du CSV (`mon_export_study.xlsx`).
+The Excel file is written next to the CSV (`my_export_study.xlsx`).
 
-| Option | Défaut | Rôle |
+| Option | Default | Purpose |
 |---|---|---|
-| `--output`, `-o` | `<input>_study.xlsx` | chemin du fichier Excel |
-| `--base-url`, `-b` | `/` | préfixe des URL proposées |
-| `--threshold`, `-t` | `0.50` | seuil de regroupement (plus haut = moins de clusters) |
-| `--min-volume`, `-v` | `10` | volume mensuel minimum pour garder un mot-clé |
-| `--min-cluster-size` | `2` | les clusters plus petits sont fusionnés avec le plus proche |
+| `--output`, `-o` | `<input>_study.xlsx` | path of the Excel file |
+| `--base-url`, `-b` | `/` | prefix for the proposed URLs |
+| `--threshold`, `-t` | `0.50` | grouping threshold (higher = fewer clusters) |
+| `--min-volume`, `-v` | `10` | minimum monthly volume to keep a keyword |
+| `--min-cluster-size` | `2` | smaller clusters are merged into the closest one |
 
-### Format du CSV
+Try it on the sample:
 
-Les colonnes sont détectées automatiquement (exports Semrush et Ahrefs, en français ou en anglais), avec n'importe quel séparateur (`,` `;` tabulation) et encodage.
+```bash
+python seo_cluster.py sample_data.csv -o out.xlsx -b /canapes/
+```
 
-- **Obligatoires** : mot-clé, volume
-- **Facultatives** : difficulté (KD), CPC, URL, position, intention
+### CSV format
 
-## Comment ça marche
+Columns are detected automatically (Semrush and Ahrefs exports, in French or English), with any separator (`,` `;` tab) and any encoding.
 
-1. **Expression principale** : chaque mot-clé est ramené à son expression de tête (« canapé convertible pas cher » → « canapé convertible »). Les groupes dont l'un contient l'autre sont fusionnés.
-2. **Regroupement sémantique** : les groupes restants sont rapprochés par similarité de vocabulaire (TF-IDF + classification hiérarchique).
-3. **Découpage en pages** : dans chaque cluster, la page pilier prend le mot-clé le plus recherché. Un sous-groupe obtient sa propre page s'il pèse au moins 300 recherches/mois sur au moins 2 mots-clés. Sinon il reste sur la page pilier.
-4. **Priorité** : score par cluster = 60 % volume + 40 % facilité (inverse de la difficulté moyenne). Les clusters sont ensuite répartis en tiers : Haute, Moyenne, Basse.
+- **Required**: keyword, volume
+- **Optional**: difficulty (KD), CPC, URL, position, intent
 
-## Limites, à connaître avant de s'en servir
+## How it works
 
-- **C'est une proposition, pas une décision.** Le regroupement repose sur les mots, pas sur la SERP. Deux synonymes (« spa » et « bien-être ») ne seront pas rapprochés. Deux requêtes proches en mots peuvent mériter deux pages différentes. Relis chaque cluster avant de lancer la rédaction.
-- **L'outil ne connaît pas ton site.** Il ne vérifie pas si une page existe déjà sur le sujet. Avant de créer une page proposée, contrôle ton sitemap : améliorer une page existante vaut mieux que créer un doublon qui la cannibalise.
-- Les titres de cluster sont générés sans accents (« Canape Lit »). À retoucher dans l'Excel.
+1. **Head phrase**: each keyword is reduced to its head phrase ("canapé convertible pas cher" becomes "canapé convertible"). Groups where one contains the other are merged.
+2. **Semantic grouping**: the remaining groups are brought together by vocabulary similarity (TF-IDF + hierarchical clustering).
+3. **Page split**: within each cluster, the pillar page takes the highest-volume keyword. A sub-group gets its own page if it totals at least 300 searches/month across at least 2 keywords. Otherwise it stays on the pillar page.
+4. **Priority**: cluster score = 60% volume + 40% ease (inverse of average difficulty). Clusters are then split into tiers: High, Medium, Low.
 
-## Licence
+## Limitations
 
-MIT. Libre d'usage, y compris commercial.
+- **It is a proposal, not a decision.** Grouping is based on words, not on the SERP. Two synonyms ("spa" and "wellness") will not be grouped together. Two queries that look close in wording may deserve two different pages. Review every cluster before commissioning content.
+- **The tool does not know your site.** It does not check whether a page on the topic already exists. Before creating a proposed page, check your sitemap: improving an existing page beats creating a duplicate that cannibalizes it.
+- Cluster titles are generated without accents ("Canape Lit"). Edit them in the Excel file.
+- Console messages and the Excel output are in French.
 
----
+## License
 
-Fait par [Youssef Jlidi](https://youssef-jlidi.com), consultant SEO & GEO.
+MIT. Free to use, including commercially.
